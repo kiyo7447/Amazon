@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium.Chrome;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,18 @@ namespace ScanBarcodeConsoleApp
 		static void Main(string[] args)
 		{
 
+			var s = Environment.TickCount;
 			var chrome = new ChromeDriver();
-
 			var barcode = "4562356928620";
 			var item = new Program().ScanBarcode(chrome, barcode);
 
 			Debug.WriteLine($"ItemName={item.Name}, Maker={item.Maker}, Prise(目安)={item.EstimatedPrice}");
+
+			//6625ms
+			Debug.WriteLine($"処理時間={Environment.TickCount - s}ms");
+
+
+
 		}
 
 		private Item ScanBarcode(RemoteWebDriver webDriver, string barcode)
@@ -36,6 +43,11 @@ namespace ScanBarcodeConsoleApp
 			webDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
 
 			var result = webDriver.FindElementById("result_0");
+
+			//var img = webDriver.FindElementByTagName("img");
+			//var imgsrc = img.GetAttribute("src");
+
+			var imgurl = result.FindElement(By.TagName("img")).GetAttribute("src") ;
 
 			//Debug.Write(result.Text);
 			var r = result.Text.Split(new char[]{'\r','\n'});
