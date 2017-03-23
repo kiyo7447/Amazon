@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,7 +27,7 @@ namespace ScanBarcodeConsoleApp
 
 			Debug.WriteLine($"ItemName={item.Name}, Maker={item.Maker}, Prise(目安)={item.EstimatedPrice}");
 
-			//6625ms
+			//6625ms, 画像取り込みを入れると9500ms
 			Debug.WriteLine($"処理時間={Environment.TickCount - s}ms");
 
 
@@ -49,6 +51,8 @@ namespace ScanBarcodeConsoleApp
 
 			var imgurl = result.FindElement(By.TagName("img")).GetAttribute("src") ;
 
+
+
 			//Debug.Write(result.Text);
 			var r = result.Text.Split(new char[]{'\r','\n'});
 
@@ -56,12 +60,20 @@ namespace ScanBarcodeConsoleApp
 			item.Name = r[0];
 			item.Maker = r[2];
 			item.EstimatedPrice = r[4];
+			item.Image = GetImage(imgurl);
 			webDriver.Quit();
 			return item;
 		}
 
+		private Image GetImage(string imgurl)
+		{
+			var client = new WebClient();
 
+			var file = Path.GetTempFileName() + ".jpg";
+			client.DownloadFile(imgurl, file);
 
+			return Image.FromFile(file);
+		}
 	}
 
 	class Item
@@ -76,7 +88,7 @@ namespace ScanBarcodeConsoleApp
 
 		public string Maker { get; set; }
 
-		public Bitmap Image { get; set; }
+		public Image Image { get; set; }
 	}
 
 	
